@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Atom, BookOpen, Microscope, Sparkles, LayoutDashboard, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Atom, BookOpen, Microscope, Sparkles, LayoutDashboard, ChevronLeft, ChevronRight, Sun, Moon } from "lucide-react";
 import { curriculumData, researchAreas } from "./data/curriculum";
 import SemesterView from "./components/curriculum/SemesterView";
 import ResearchView from "./components/curriculum/ResearchView";
@@ -18,9 +18,22 @@ const NAV_TABS = [
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [activeSemester, setActiveSemester] = useState(1);
+  const [isDark, setIsDark] = useState(() => {
+    try { return localStorage.getItem("theme") !== "light"; } catch { return true; }
+  });
   const [apiKey, setApiKey] = useState(() => {
     try { return localStorage.getItem("anthropic_key") || ""; } catch { return ""; }
   });
+
+  useEffect(() => {
+    const html = document.documentElement;
+    if (isDark) {
+      html.classList.remove("light");
+    } else {
+      html.classList.add("light");
+    }
+    try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch {}
+  }, [isDark]);
 
   const handleApiKeySet = (key: string) => {
     setApiKey(key);
@@ -69,10 +82,21 @@ export default function App() {
               })}
             </nav>
 
-            <div className="hidden md:flex items-center gap-4 text-xs text-slate-500">
-              <span>{totalCourses} courses</span>
-              <span>{totalCredits} credits</span>
-              <span>8 semesters</span>
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-4 text-xs text-slate-500">
+                <span>{totalCourses} courses</span>
+                <span>{totalCredits} credits</span>
+                <span>8 semesters</span>
+              </div>
+
+              {/* Theme toggle */}
+              <button
+                onClick={() => setIsDark(!isDark)}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-all"
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
             </div>
           </div>
         </div>
